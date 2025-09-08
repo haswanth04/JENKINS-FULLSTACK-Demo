@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        TOMCAT_DIR = 'C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps'
+    }
+
     stages {
 
         // ===== FRONTEND BUILD =====
@@ -17,13 +21,11 @@ pipeline {
         stage('Deploy Frontend to Tomcat') {
             steps {
                 bat '''
-                set TOMCAT_DIR=C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\reactapp
-
-                if exist "%TOMCAT_DIR%" (
-                    rmdir /S /Q "%TOMCAT_DIR%"
+                if exist "%TOMCAT_DIR%\\reactapp" (
+                    rmdir /S /Q "%TOMCAT_DIR%\\reactapp"
                 )
-                mkdir "%TOMCAT_DIR%"
-                xcopy /E /I /Y task-manager\\dist\\* "%TOMCAT_DIR%\\"
+                mkdir "%TOMCAT_DIR%\\reactapp"
+                xcopy /E /I /Y task-manager\\dist\\* "%TOMCAT_DIR%\\reactapp"
                 '''
             }
         }
@@ -41,16 +43,13 @@ pipeline {
         stage('Deploy Backend to Tomcat') {
             steps {
                 bat '''
-                set TOMCAT_DIR=C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps
-
                 if exist "%TOMCAT_DIR%\\TaskManager-0.0.1-SNAPSHOT.war" (
                     del /F /Q "%TOMCAT_DIR%\\TaskManager-0.0.1-SNAPSHOT.war"
                 )
                 if exist "%TOMCAT_DIR%\\TaskManager-0.0.1-SNAPSHOT" (
                     rmdir /S /Q "%TOMCAT_DIR%\\TaskManager-0.0.1-SNAPSHOT"
                 )
-
-                copy TaskManager\\target\\*.war "%TOMCAT_DIR%\\"
+                copy "TaskManager\\target\\*.war" "%TOMCAT_DIR%\\"
                 '''
             }
         }
@@ -58,10 +57,10 @@ pipeline {
 
     post {
         success {
-            echo 'Deployment Successful!'
+            echo '✅ Task Manager Deployment Successful!'
         }
         failure {
-            echo 'Pipeline Failed.'
+            echo '❌ Task Manager Pipeline Failed.'
         }
     }
 }
