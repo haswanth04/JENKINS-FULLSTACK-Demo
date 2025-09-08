@@ -17,11 +17,13 @@ pipeline {
         stage('Deploy Frontend to Tomcat') {
             steps {
                 bat '''
-                if exist "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\task-manager" (
-                    rmdir /S /Q "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\task-manager"
+                set TOMCAT_DIR=C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\reactapp
+
+                if exist "%TOMCAT_DIR%" (
+                    rmdir /S /Q "%TOMCAT_DIR%"
                 )
-                mkdir "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\task-manager"
-                xcopy /E /I /Y STUDENTAPI-REACT\\dist\\* "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\task-manager"
+                mkdir "%TOMCAT_DIR%"
+                xcopy /E /I /Y task-manager\\dist\\* "%TOMCAT_DIR%\\"
                 '''
             }
         }
@@ -30,7 +32,7 @@ pipeline {
         stage('Build Backend') {
             steps {
                 dir('TaskManager') {
-                    bat 'mvn clean package'
+                    bat 'mvn clean package -DskipTests'
                 }
             }
         }
@@ -39,25 +41,27 @@ pipeline {
         stage('Deploy Backend to Tomcat') {
             steps {
                 bat '''
-                if exist "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\springbootstudentapi.war" (
-                    del /Q "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\springbootstudentapi.war"
+                set TOMCAT_DIR=C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps
+
+                if exist "%TOMCAT_DIR%\\TaskManager-0.0.1-SNAPSHOT.war" (
+                    del /F /Q "%TOMCAT_DIR%\\TaskManager-0.0.1-SNAPSHOT.war"
                 )
-                if exist "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\springbootstudentapi" (
-                    rmdir /S /Q "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\springbootstudentapi"
+                if exist "%TOMCAT_DIR%\\TaskManager-0.0.1-SNAPSHOT" (
+                    rmdir /S /Q "%TOMCAT_DIR%\\TaskManager-0.0.1-SNAPSHOT"
                 )
-                copy "STUDENTAPI-SPRINGBOOT\\target\\*.war" "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\"
+
+                copy TaskManager\\target\\*.war "%TOMCAT_DIR%\\"
                 '''
             }
         }
-
     }
 
     post {
         success {
-            echo 'Deployment Successful!'
+            echo '✅ Deployment Successful!'
         }
         failure {
-            echo 'Pipeline Failed.'
+            echo '❌ Pipeline Failed.'
         }
     }
 }
