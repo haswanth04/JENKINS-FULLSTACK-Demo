@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        TOMCAT_DIR = 'C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps'
-    }
-
     stages {
 
         // ===== FRONTEND BUILD =====
@@ -21,11 +17,11 @@ pipeline {
         stage('Deploy Frontend to Tomcat') {
             steps {
                 bat '''
-                if exist "%TOMCAT_DIR%\\reactapp" (
-                    rmdir /S /Q "%TOMCAT_DIR%\\reactapp"
+                if exist "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\reacttaskmanager" (
+                    rmdir /S /Q "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\reacttaskmanager"
                 )
-                mkdir "%TOMCAT_DIR%\\reactapp"
-                xcopy /E /I /Y task-manager\\dist\\* "%TOMCAT_DIR%\\reactapp"
+                mkdir "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\reacttaskmanager"
+                xcopy /E /I /Y task-manager\\dist\\* "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\reacttaskmanager"
                 '''
             }
         }
@@ -43,24 +39,25 @@ pipeline {
         stage('Deploy Backend to Tomcat') {
             steps {
                 bat '''
-                if exist "%TOMCAT_DIR%\\TaskManager-0.0.1-SNAPSHOT.war" (
-                    del /F /Q "%TOMCAT_DIR%\\TaskManager-0.0.1-SNAPSHOT.war"
+                if exist "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\taskmanager.war" (
+                    del /Q "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\taskmanager.war"
                 )
-                if exist "%TOMCAT_DIR%\\TaskManager-0.0.1-SNAPSHOT" (
-                    rmdir /S /Q "%TOMCAT_DIR%\\TaskManager-0.0.1-SNAPSHOT"
+                if exist "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\taskmanager" (
+                    rmdir /S /Q "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\taskmanager"
                 )
-                copy "TaskManager\\target\\*.war" "%TOMCAT_DIR%\\"
+                copy "TaskManager\\target\\*.war" "C:\\Program Files\\Apache Software Foundation\\Tomcat 10.1\\webapps\\"
                 '''
             }
         }
+
     }
 
     post {
         success {
-            echo '✅ Task Manager Deployment Successful!'
+            echo 'Deployment Successful!'
         }
         failure {
-            echo '❌ Task Manager Pipeline Failed.'
+            echo 'Pipeline Failed.'
         }
     }
 }
